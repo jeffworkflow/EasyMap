@@ -164,6 +164,9 @@ function ac.timer(timeout, count, on_timer)
 		on_timer(t)
 		count = count - 1
 		if count <= 0 then
+			if t.on_timerout then 
+				t:on_timerout()
+			end	
 			t:remove()
 		end
 	end)

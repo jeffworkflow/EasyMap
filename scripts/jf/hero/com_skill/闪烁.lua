@@ -101,8 +101,18 @@ function mt:on_cast_start()
 	
 	-- self.eff = hero:get_point():add_effect([[AZ_SSCrow_D.mdx]]):remove();
 	self.eff1 = ac.effect(new_point,[[AZ_SSCrow_D.mdx]],0,1,'overhead'):remove(); 
+	-- self.eff1 = ac.effect(new_point,[[AZ_SSCrow_D.mdx]],0,1,'overhead'); 
+	-- self.eff1.unit:set_size(5)
+	-- self.eff1.unit:add_buff '淡化*改'
+	-- {
+	-- 	source_alpha = 0,
+	-- 	target_alpha = 100,
+	-- 	time = 1,
+	-- 	remove_when_hit = false,
+	-- }
 
-	-- eff1:set_size(5)
+
+	--self.eff1
 	-- local eff2 = ac.point(0,0):add_effect([[AZ_SSCrow_D.mdx]])
 	-- eff2:set_size(0.3)
 	
@@ -165,7 +175,6 @@ end
 
 function mt:on_remove()
 
-	self.trigger:remove();
 	self.timer:remove();
 end
 

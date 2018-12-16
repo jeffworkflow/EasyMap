@@ -6,7 +6,7 @@ require 'jf.hero.丹特丽安.明日之诗'
 return ac.hero.create '丹特丽安'
 {
 	--物编中的id
-	id = 'H010',
+	id = 'T010',
 
 	production = '丹特丽安的书架',
 

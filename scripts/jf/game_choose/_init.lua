@@ -1,0 +1,1 @@
+require 'jf.game_choose.game_model_dialog'

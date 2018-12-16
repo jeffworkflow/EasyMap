@@ -17,7 +17,6 @@ local target_angle
 local skip
 local radius
 local last_target
-
 --多面板
 local mb = nil
 local flygroup = {}
@@ -133,7 +132,6 @@ local function start()
 		local hero_slk = slk.unit[hero_id]
 		local hero = player[16]:create_unit(hero_id, cent - {r * i + 90, radius}, r * i - 90)
 		hero.name = name
-		player[16]:create_unit('h002',cent - {r * i + 90, radius-50}, r * i - 90)
 		-- hero:set_high(3000)
 		hero:remove_ability 'Amov'
 		hero:add_restriction '缴械'
@@ -289,7 +287,7 @@ local function start()
 			--等待初始化
 			p:hideInterface(1)
 			--创建英雄给选择者
-			local pnt	= map.rects['出生点'][p:get_team()]:get_point()
+			local pnt	= map.rects['出生点']:get_point()
 			local r		= 360 / 5 * p:get()
 			p.hero = p:createHero(hero_name, pnt - {r, 150}, r + 180)
 	

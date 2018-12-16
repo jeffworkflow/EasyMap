@@ -15,57 +15,23 @@ map.rects = {}
 --选人区域
 --map.rects['选人区域'] = rect.j_rect 'choose_hero'
 
-map.rects['选人区域'] = rect.create(-1500,-1000,-2000,-2500)
+map.rects['选人区域'] = rect.j_rect 'choosehero'
 map.rects['test'] = rect.create(400,0,1000,1000)
 map.rects['test2'] = rect.create(-1500,1000,-2000,1500)
 
--- map.rects['选人区域'] = rect.create(-1500,1000,-2000,1500)
--- map.rects['test'] = rect.create(-1500,-1000,-2000,-1500)
---刷兵区域
-map.rects['刷兵区域'] = {}
-	map.rects['刷兵区域']['沉沦遗迹'] = {}
-		map.rects['刷兵区域']['沉沦遗迹']['上路'] = {
-			rect.j_rect 'army_l_1',
-			rect.j_rect 'army_l_2',
-			rect.j_rect 'army_l_3',
-			rect.j_rect 'army_l_4',
-		}
-		map.rects['刷兵区域']['沉沦遗迹']['中路'] = {
-			rect.j_rect 'army_m_1',
-			rect.j_rect 'army_m_2',
-		}
-		map.rects['刷兵区域']['沉沦遗迹']['下路'] = {
-			rect.j_rect 'army_r_1',
-			rect.j_rect 'army_r_2',
-			rect.j_rect 'army_r_3',
-			rect.j_rect 'army_r_4',
-		}
-	map.rects['刷兵区域']['幻想神社'] = {}
-		map.rects['刷兵区域']['幻想神社']['上路'] = {
-			rect.j_rect 'army_l_4',
-			rect.j_rect 'army_l_3',
-			rect.j_rect 'army_l_2',
-			rect.j_rect 'army_l_1',
-		}
-		map.rects['刷兵区域']['幻想神社']['中路'] = {
-			rect.j_rect 'army_m_2',
-			rect.j_rect 'army_m_1',
-		}
-		map.rects['刷兵区域']['幻想神社']['下路'] = {
-			rect.j_rect 'army_r_4',
-			rect.j_rect 'army_r_3',
-			rect.j_rect 'army_r_2',
-			rect.j_rect 'army_r_1',
-		}
-
 --英雄出生点
-map.rects['出生点'] = {
-	rect.j_rect 'player_home_1',
-	rect.j_rect 'player_home_2',
-}
+map.rects['出生点'] = rect.j_rect 'wq'
+
+--区域
+map.rects['郊区'] = rect.j_rect 'outtown'
+map.rects['郊区1'] = rect.j_rect 'outtown1'
+map.rects['郊区2'] = rect.j_rect 'outtown2'
+map.rects['郊区3'] = rect.j_rect 'outtown3'
+map.rects['郊区4'] = rect.j_rect 'outtown4'
 
 --全地图
-map.rects['全地图'] = rect.create(-6000, -6000, 6000, 6000)
+map.rects['全地图'] = rect.create(-8192, -8192, 8192, 8192)
+ac.map = map.rects['全地图'] 
 
 --注册不可通行区域
 --point.path_region = region.create()
@@ -101,90 +67,3 @@ end
 
 --禁用边界渲染
 jass.EnableWorldFogBoundary(false)
---在天空处创建视野修整器
-for i = 1, 2 do
-	local p = player.com[i]
-	for x = 1, 4 do
-		fogmodifier.create(p, rect.j_rect('air_visible_' .. x))
-	end
-end
---出地图者死
-local out_reg = region.create()
-for x = 1, 4 do
-	out_reg = out_reg + rect.j_rect('air_visible_' .. x)
-end
-
-out_reg:event '区域-进入' (function(trg, hero)
-	if hero:is_hero() and not hero.out_map_dying then
-		--标记已经在死了
-		hero.out_map_dying = true
-		--附近找个地方
-		local p = hero:get_point() - {hero:get_facing() + math.random(-60, 60), math.random(800, 1000)}
-		--创建一个黑洞
-		local eff = ac.effect(p, [[cosmic field_65.mdl]])
-		eff.unit:set_size(1)
-		eff.unit:shareVisible(hero:get_owner())
-		eff.unit:addSight(400)
-
-		local mvr = ac.mover.target
-		{
-			source = eff.unit,
-			mover = hero,
-			start = hero,
-			target = eff.unit,
-			speed = 0,
-			accel = 100,
-			skill = false,
-			super = true,
-		}
-
-		local function kill()
-			hero:add_buff '晕眩'
-			{
-				source = hero,
-				time = 1,
-			}
-			hero:set_animation('death')
-			local count = 45
-			ac.loop(20, function(t)
-				if count <= 0 then
-					hero:kill()
-					eff:remove()
-					hero.out_map_dying = false
-					hero:set_size(1)
-					hero:set_high(0)
-					if not hero:is_alive() then
-						hero:add_restriction '阿卡林'
-						hero:event '单位-复活' (function(trg)
-							trg:remove()
-							hero:remove_restriction '阿卡林'
-						end)
-					end
-					t:remove()
-					return
-				end
-				count = count - 1
-				hero:set_size(0.022*count)
-				hero:set_high(135-3*count)
-				hero:blink(p,true,true)
-				if count == 15 then
-					ac.effect(p, [[shadowexplosion.mdl]]):remove()
-				end
-				if count > 15 then
-					eff.unit:set_size(1.9-0.02*count)
-				else
-					eff.unit:set_size(0.1*count)
-				end
-			end)
-		end
-		
-		if not mvr then
-			kill()
-			return
-		end
-
-		function mvr:on_remove()
-			kill()
-		end
-	end
-end)
