@@ -1,0 +1,19 @@
+Date: 2018-12-12 22:57:18
+Version: 2.4.3
+Commit: 69266a77536af75701cfbadf607691faed162abd
+Stack:
+----------------------------------------
+D:\one-map\EasyMap\tools\w3x2lni\bin\w3x2lni-lua.exe: .\core\slk/frontend_merge.lua:150: assertion failed!
+stack traceback:
+	[C]: in function 'assert'
+	.\core\slk/frontend_merge.lua:150: in method 'frontend_merge'
+	.\core\slk/frontend.lua:166: in upvalue 'update_then_merge'
+	.\core\slk/frontend.lua:216: in method 'frontend'
+	.\backend\convert.lua:135: in function 'backend.convert'
+	.\backend\cli\slk.lua:4: in function 'backend.cli.slk'
+	.\backend\init.lua:12: in main chunk
+	[C]: in function 'require'
+	D:\one-map\EasyMap\tools\w3x2lni\script\main.lua:2: in main chunk
+	[C]: in ?
+
+----------------------------------------

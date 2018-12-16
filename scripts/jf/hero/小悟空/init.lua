@@ -7,7 +7,7 @@ require 'jf.hero.com_skill.init'
 return ac.hero.create '小悟空'
 {
 	--物编中的id
-	id = 'H00C',
+	id = 'T00C',
 
 	production = '龙珠',
 

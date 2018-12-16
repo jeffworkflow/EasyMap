@@ -16,7 +16,7 @@ require 'jf.hero.小矮人.霜冻攻击'
 return ac.hero.create '小矮人'
 {
 	--物编中的id
-	id = 'H00B',
+	id = 'T00B',
 
 	production = 'war3',
 

@@ -1,14 +1,14 @@
 local mt = ac.skill['万箭齐发']
 mt{
     --等级
-    level = 1,
+    level = 0,
 
     --是被动
     passive = true,
 
     --原始伤害
     damage = function(self,hero)
-        return hero:get '智力' * 2 + hero:get '敏捷' * 3
+        return hero:get '智力' * 2 + hero:get '敏捷' * 3 +400
     end,
 
     --释放几率

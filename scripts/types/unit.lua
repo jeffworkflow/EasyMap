@@ -10,6 +10,7 @@ local move = require 'types.move'
 local game = require 'types.game'
 local order2id = require 'war3.order_id'
 local damage = require 'types.damage'
+
 local math = math
 local ignore_flag = false
 local table_insert = table.insert
@@ -194,6 +195,110 @@ end
 		return self.user_data[key]
 	end
 
+	-- 获取幸运掉落名称
+	-- 	table
+	-- 	幸运值
+	local function get_luckey_name (table,luc)
+		local tran_gift = {}
+		local temp_gift = 0 
+		local mx_gift = 0
+		local mx_gift_key 
+		local luc = luc or 0 
+		
+		for k,v in pairs(table) do 
+			if type(v) =='table'  then
+				if v[1] > mx_gift then
+					mx_gift = v[1]
+					mx_gift_key = k
+				end	
+			else 
+				if v > mx_gift then
+					mx_gift = v
+					mx_gift_key = k
+				end	
+			end	
+		end		
+		
+		--计算幸运值加成
+		--默认概率最大的 为最不幸的，为要降低的对象，最高幸运值只能加100%概率
+		for k,v in pairs(table) do 
+			if type(v) =='table'  then
+				 if mx_gift_key == k then 
+					 table[k][1] = v[1] *(1 - luc/100) 
+					 if table[k][1] < 0 then
+						table[k][1]=0
+					 end 	
+				 else
+					 table[k][1] = v[1] *(1 + luc/100) 
+				 end	
+			else 
+				 if mx_gift_key == k then 
+					 table[k] = v *(1 - luc/100) 
+					 if table[k] < 0 then
+						table[k] = 0
+					 end 	
+				 else
+					 table[k] = v *(1 + luc/100) 
+				 end	
+			end	
+		end	
+		
+		for k,v in pairs(table) do 
+			if type(v) =='table'  then 
+				tran_gift[k] = {}
+				tran_gift[k][1] = temp_gift + 1
+				tran_gift[k][2] = temp_gift +v[1]*100 
+				temp_gift = temp_gift +v[1]*100  
+			else
+				tran_gift[k] = {}
+				tran_gift[k][1] = temp_gift + 1
+				tran_gift[k][2] = temp_gift +v*100
+				temp_gift = temp_gift +v*100
+			end	
+		end	
+	
+		local name = ''
+		local t  = math.random(temp_gift)
+		for k,v in pairs(tran_gift) do
+			if  t <= v[2] and  t >= v[1] then 
+				name = k
+				break
+			end
+		end
+		return name	
+	end		
+
+	-- 获取幸运掉落名称
+	-- 	table
+	-- 	幸运值
+
+	function mt:get_fall_name(table,luc)
+		
+		local name = get_luckey_name(table,luc)
+		local tt_name = name
+
+		if 	table[name][2] then
+			for k, v in pairs(table[name][2]) do
+				--key 有值，表示有指定抽取的装备 和随机概率。	
+				if type(k) == "string" then
+					tt_name = get_luckey_name(table[name][2],luc)
+					break
+				else
+					tt_name = table[name][2][math.random(1,#table[name][2])]	
+					break
+				end		
+			end	
+		else
+			--没有指定特殊掉落，从全局幸运池里进行抽取。		
+			if ac.luckey_item[name] then
+				tt_name = ac.luckey_item[name][math.random(1,#ac.luckey_item[name])]	 	
+			end	
+		end		
+		
+		return tt_name
+		
+	end		
+
 --死亡	
 	--杀死单位
 	--	[致死伤害]
@@ -211,6 +316,35 @@ end
 		
 		if not self:is_dummy() then
 			jass.KillUnit(self.handle)
+
+			--死亡时，掉钱和经验
+			if self.reward_money then 
+				killer:addGold(self.reward_money)
+			end	
+
+			if self.reward_xp and killer:is_hero() then 
+				killer:addXp(self.reward_xp)
+			end	
+
+			if self.fall_item then 
+
+				if killer ~= self then 
+					p = killer:get_owner()
+					local name = self:get_fall_name(self.fall_item,p.luckey or 0)
+
+					--只有物品被注册时才允许掉落
+					local data = ac.item[name]
+					if type(data) == 'function'  then
+						-- print(name,'没有被注册')
+					else
+						self:get_point():add_item(name)	
+					end	
+
+				end	
+
+			end
+			
+
 			killer:event_notify('单位-杀死单位', killer, self)
 			self:event_notify('单位-死亡', self, killer)
 		end
@@ -277,6 +411,13 @@ end
 		if self._timers then
 			for i, t in ipairs(self._timers) do
 				t:remove()
+			end
+		end
+		
+		--移除单位身上的Unit_button表
+		if self._unit_buttons then
+			for _, button in pairs(self._unit_buttons) do
+				button:remove()
 			end
 		end
 
@@ -375,11 +516,16 @@ end
 
 	--传送到指定位置
 	--	[无视地形]
-	function mt:blink(target, path, not_stop)
+	--	[不停止]
+	--	[镜头跟随]
+	function mt:blink(target, path, not_stop,follow_camera)
 		local source = self:get_point()
 		if self:set_position(target, path) then
 			self:event_notify('单位-传送完成', self, source, target)
 		end
+		if follow_camera then 
+			self:get_owner():setCamera(target)
+		end	
 		if not not_stop then self:issue_order 'stop' end
 	end
 
@@ -1200,7 +1346,7 @@ function mt:create_unit(id, where, face)
 	end
 	return self:get_owner():create_unit(id, where, face or self:get_facing())
 end
-
+-- 类似 new 根据句柄 初始化另一个table出来。
 local function init_unit(handle, p)
 	if unit.all_units[handle] then
 		return unit.all_units[handle]
@@ -1223,8 +1369,8 @@ local function init_unit(handle, p)
 	u:remove_ability 'Arav'
 
 	--忽略警戒点
-	jass.RemoveGuardPosition(u.handle)
-	jass.SetUnitCreepGuard(u.handle, true)
+	-- jass.RemoveGuardPosition(u.handle)
+	-- jass.SetUnitCreepGuard(u.handle, true)
 
 	--设置高度
 	u:set_high(u:get_slk('moveHeight', 0))
@@ -1263,6 +1409,9 @@ function unit.init_unit(handle, p)
 				u:add_restriction(v)
 			end
 		end
+		if data.fall_item then
+			u.fall_item = data.fall_item
+		end	
 	end
 	if u:getAbilityLevel 'Aloc' == 0 then
 		u:event_notify('单位-创建', u)
@@ -1879,28 +2028,6 @@ function unit.registerJassTriggers()
 	-- for i = 1, 13 do
 	-- 	jass.TriggerRegisterPlayerUnitEvent(j_trg, player[i].handle, jass.EVENT_PLAYER_UNIT_USE_ITEM, nil)
 	-- end
-
-	--单位出售单位事件
-	local j_trg = war3.CreateTrigger(function()
-		local handle = jass.GetSoldUnit()
-		local shop = unit.j_unit(jass.GetTriggerUnit())
-		local unit = unit.j_unit(jass.GetBuyingUnit())
-		local id = base.id2string(jass.GetUnitTypeId(handle))
-		local name = Registry:id_to_name(id)
-
-		local button = Unit_button:new(name, unit, shop)
-		if button then
-			button:click()
-			jass.RemoveUnit(handle)
-			return
-		end
-		local sold_unit = unit.j_unit(handle)
-		unit:event_notify('单位-购买单位', unit, sold_unit, shop)
-		shop:event_notify('单位-出售单位', shop, sold_unit, unit)
-	end)
-	for i = 1, 16 do
-		jass.TriggerRegisterPlayerUnitEvent(j_trg, player[i].handle, jass.EVENT_PLAYER_UNIT_SELL, nil)
-	end
 
 
 

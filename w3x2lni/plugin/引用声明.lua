@@ -22,7 +22,6 @@ for x = 0, 9 do
         list['AL'..x..y] = true
         list['AT'..x..y] = true
         list['AD'..x..y] = true
-        list['IT'..x..y] = true
         list['ID'..x..y] = true
     end
 end
@@ -40,6 +39,7 @@ list['A888'] = true
 list['A889'] = true
 list['A01H'] = true
 list['A00V'] = true
+list['A00B'] = true
 list['A00E'] = true
 list['AZ00'] = true
 list['AB31'] = true
@@ -53,11 +53,12 @@ list['Asid'] = true
 list['Apit'] = true
 list['AHtb'] = true
 list['Aply'] = true 
+list['nabc'] = true 
 
 
 
 
-local firsts = 'ehbnH'
+local firsts = 'ehbnHTI'
 local chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 for x = 0, 1 do
     for y = 1, #chars do
