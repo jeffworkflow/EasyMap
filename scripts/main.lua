@@ -87,8 +87,8 @@ local function main()
 	unit.saveDefaultUnits()
 
 	local rect = require 'types.rect'
-	-- local u = ac.player(1):create_unit('h000',rect.create(400,-600,400,-600));
-	-- print(u)
+	local u = ac.player(1):create_unit('h000',rect.create(400,-600,400,-600));
+	print(u)
 	--游戏
 	-- local map = require 'maps.map'
 	local map = require 'jf.map'

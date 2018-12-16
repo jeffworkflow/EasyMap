@@ -1,5 +1,5 @@
 local mt = ac.item['神石']{
-    war3_id = 'I00K',
+    war3_id = 'ID01',
     gold = 1000,
     --最大的可用次数
     max_stack = 100,
@@ -24,7 +24,6 @@ local mt = ac.item['神石']{
 function mt:on_add()
     local unit = self.owner
     local p = unit:get_owner()
-    
     self.kill_unit_trg = unit:event '单位-杀死单位'(function(trg, killer, killed)
         if self:get_stack() < self.max_stack then
             self:add_stack()

@@ -6,7 +6,7 @@ require 'jf.hero.惠惠.强化爆裂魔法'
 return ac.hero.create '惠惠'
 {
 	--物编中的id
-	id = 'T003',
+	id = 'H003',
 
 	production = '为美好的世界献上祝福！',
 

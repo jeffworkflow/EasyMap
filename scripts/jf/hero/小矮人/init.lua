@@ -20,7 +20,7 @@ require 'jf.hero.小矮人.火遁'
 return ac.hero.create '小矮人'
 {
 	--物编中的id
-	id = 'T00B',
+	id = 'H00B',
 
 	production = 'war3',
 
@@ -39,13 +39,12 @@ return ac.hero.create '小矮人'
 	--敏捷I 敏捷II 敏捷III
 	--智力I 智力II 智力III
 	--雷霆之箭 山丘之锤  回旋刃 山丘的大锤子 
-	--  龟派气功 凝霜冰杖 追踪御礼 环绕之风  智力I 智力II 智力III 闪烁 嗜血辅助 流血 扑杀辅助  多重锤-目标 范围辅助 分裂箭  多重投射 蓄力 勇猛 致命恐惧 追猎 求生 死亡体验  憎恨 坚韧 磐石 恐吓   净化III 净化II 净化I 愈体 回春 活力 攻击回血  力量1 力量2  力量3  霜冻攻击    多重锤-目标 生命成长
 
 	--[[data.attack = true
 	data.common_attack = true
 	data.skill = data.skill 猥琐的闪电箭   灵符[梦想封印]
 	]]
-	skill_names = ' 闪烁  万箭齐发   力量III 爆裂火球   ' ,
+	skill_names = ' 万箭齐发  不规则运动 光速[光速跳跃]  闪烁   力量III 爆裂火球    龟派气功 凝霜冰杖 追踪御礼 环绕之风  智力I 智力II 智力III 闪烁 嗜血辅助 流血 扑杀辅助  多重锤-目标 范围辅助 分裂箭  多重投射 蓄力 勇猛 致命恐惧 追猎 求生 死亡体验  憎恨 坚韧 磐石 恐吓   净化III 净化II 净化I 愈体 回春 活力 攻击回血  力量1 力量2  力量3  霜冻攻击    多重锤-目标 生命成长' ,
 
 	attribute = {
 		['力量'] = 10,

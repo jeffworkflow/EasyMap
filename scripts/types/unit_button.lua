@@ -1,6 +1,5 @@
 local jass = require 'jass.common'
 local Unit = require 'types.unit'
-local player = require 'ac.player'
 
 local Unit_button = {}
 setmetatable(Unit_button, Unit_button)
@@ -9,17 +8,12 @@ setmetatable(Unit_button, Unit_button)
 local mt = {}
 Unit_button.__index = mt
 
-mt.type = nil
-
 --点击按钮
 function mt:click()
     if self.on_click then
         self:on_click()
     end
     if self.clicker then
-        -- Sound\Interface\AutoCastButtonClick1.wav --任务提示音
-        -- Sound\Interface\BigButtonClick.wav  --按钮点击音
-        -- PingMinimap 小地图提示
         self.clicker:event_notify('单位-点击单位按钮', self.clicker, self)
     end
 end
@@ -46,7 +40,6 @@ end
 function mt:new(name, unit, shop)
     local Button = ac.unit_button[name]
     if type(Button) == 'function' then
-        print('按钮没有被注册')
         return false
     end
     local parent = Button[unit]
@@ -91,29 +84,6 @@ function Unit.__index:add_unit_button(name, stock)
 
     -- ac.unit_button[name]
 	return Button
-end
-
---单位出售单位事件
-local j_trg = war3.CreateTrigger(function()
-    local handle = jass.GetSoldUnit()
-    local shop = ac.unit(jass.GetTriggerUnit())
-    local unit = ac.unit(jass.GetBuyingUnit())
-    local id = base.id2string(jass.GetUnitTypeId(handle))
-    local name = Registry:id_to_name(id)
-
-    local button = Unit_button:new(name, unit, shop)
-    if button then
-        button:click()
-        jass.RemoveUnit(handle)
-        -- return
-    end
-    local sold_unit = ac.unit(handle)
-    -- print(shop,button,unit,sold_unit)
-    unit:event_notify('单位-购买单位', unit, sold_unit, shop)
-    shop:event_notify('单位-出售单位', shop, sold_unit, unit)
-end)
-for i = 1, 16 do
-    jass.TriggerRegisterPlayerUnitEvent(j_trg, player[i].handle, jass.EVENT_PLAYER_UNIT_SELL, nil)
 end
 
 

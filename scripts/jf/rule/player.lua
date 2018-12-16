@@ -21,6 +21,10 @@ player.force = {}
 		player[3],
 		player[4],
 		player[5],
+	}
+
+	player.force[2] = {
+		[0] = player.com[2],
 		player[6],
 		player[7],
 		player[8],
@@ -28,23 +32,19 @@ player.force = {}
 		player[10],
 	}
 
-	player.force[2] = {
-		[0] = player.com[2],
-	}
-
 --玩家结盟
-for x = 0, 10 do
-	for y = 0, 10 do
+for x = 0, 5 do
+	for y = 0, 5 do
 		player.force[1][x]:setAllianceSimple(player.force[1][y], true)
-		player.force[1][x]:setAllianceSimple(player.force[2][0], false)
-		player.force[2][0]:setAllianceSimple(player.force[1][y], false)
-		player.force[2][0]:setAllianceSimple(player.force[2][0], true)
+		player.force[1][x]:setAllianceSimple(player.force[2][y], false)
+		player.force[2][x]:setAllianceSimple(player.force[1][y], false)
+		player.force[2][x]:setAllianceSimple(player.force[2][y], true)
 	end
 	player.force[1][x]:setTeam(1)
-	player.force[2][0]:setTeam(2)
+	player.force[2][x]:setTeam(2)
 	--允许控制中立被动的单位
 	player.force[1][x]:enableControl(player[16])
-	player.force[2][0]:enableControl(player[16])
+	player.force[2][x]:enableControl(player[16])
 end
 
 --电脑与野怪互相友好

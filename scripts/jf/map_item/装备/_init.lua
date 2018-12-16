@@ -1,8 +1,0 @@
-require 'jf.map_item.装备.新手剑'
-require 'jf.map_item.装备.新手剑+1'
-require 'jf.map_item.装备.新手剑+2'
-require 'jf.map_item.装备.新手石'
-require 'jf.map_item.装备.新手甲'
-require 'jf.map_item.装备.新手戒指'
-require 'jf.map_item.装备.灵宝剑'
-require 'jf.map_item.装备.合成装备'

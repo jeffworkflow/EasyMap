@@ -3,7 +3,7 @@ local table = table
 local player = require 'ac.player'
 
 local tips = {
-	'双击 X 移动到练功房， 双击 C 回城',
+	'争夺宝箱将大幅提升团队实力，点击右上角多面板进行查看！',
 
 	'英雄死亡会掉落节操，捡起对方节操可以更快的拆塔哦！',
 

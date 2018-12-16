@@ -9,20 +9,20 @@ end
 --每秒8块钱
 local t
 local gold = 8
-local player_count = {10, 1}
+local player_count = {5, 5}
 
 ac.game:event '游戏-开始' (function()
 	t = ac.timer(1000 / 5, 0, function()
-		
-		local tp = player.force[1]
-		local g = gold / player_count[1]
-		for i = 1, 10 do
-			local p = tp[i]
-			if p:is_player() then
-				p:addGold(g)
+		for team = 1, 2 do
+			local tp = player.force[team]
+			local g = gold / player_count[team]
+			for i = 1, 5 do
+				local p = tp[i]
+				if p:is_player() then
+					p:addGold(g)
+				end
 			end
 		end
-		
 	end)
 end)
 

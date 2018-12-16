@@ -231,17 +231,7 @@ end
 --	物品名字或id   
 function Unit.__index:add_item_button(name, stock)
 	local id = Registry:name_to_id(name)
-	local item = ac.item[id]
-	if type(item) =='function' then
-		print(name..'还没注册')
-		return false
-	end	
-	--由于魔兽机制 japi修改的物品string，需要创建完后再添加到商店 才能生效。
-	local it = ac.point(0,0):add_item(id)
-	if it then 
-		it:remove()
-	end	
-	-- print(item)
+	-- local item = ac.item[id]
     local currentstock = stock or Item.currentstock or 1
 	local stockmax = stock or Item.stockmax  or 1
 	
@@ -253,26 +243,6 @@ function Unit.__index:add_item_button(name, stock)
     -- ac.unit_button[name]
 	-- return item
 end
-
---  为单位 删除 卖的物品
---	物品名字或id   
-function Unit.__index:remove_item_button(name, stock)
-	local id = Registry:name_to_id(name)
-	local item = ac.item[id]
-	if type(item) =='function' then
-		print(name..'还没注册')
-		return false
-	end	
-    jass.RemoveItemFromStock(self.handle,base.string2id(id)) 
-
-end
-
---  删除所有市场的物品
---	物品名字或id   
-function Item.remove_item_button_all()
-	local id = Registry:name_to_id(name)
-    jass.RemoveItemFromAllStock(base.string2id(id)) 
-end	
 
 --点创建物品
 --	物品名字或id
@@ -303,11 +273,10 @@ function Item.create_item(id, who, data)
 		dbg.handle_ref(handle)
 		local item = Item.new(handle)
 		
-		-- 加之前 和 装备唯一 可能要重构下。
 		if item  and item.before_add then
-			--如果有回调且返回false 或 不填 移除已创建的物品，直接返回
+			--如果有回调，且返回false、不填 都移除已创建的物品，直接返回
 			if not item:before_add(unit)  then
-				-- print('create_item 函数内的handle',handle) 
+				print('create_item 函数内的handle',handle) 
 				item:remove()
 				return 
 			end	
@@ -317,9 +286,9 @@ function Item.create_item(id, who, data)
 		
 		if item.unique and unit:has_item(Registry:id_to_name(id)) then 
 			
-	    	-- print('create_item 函数内的handle',handle) 
+	    	print('create_item 函数内的handle',handle) 
 			item:remove()
-			who:get_owner():sendMsg("|cffFCD830"..Registry:id_to_name(id).."|r不允许重复获得")
+			who:get_owner():sendMsg(Registry:id_to_name(id).."不允许重复获得")
 			return 
 		end	
 
@@ -357,22 +326,13 @@ function Item.new(handle)
 		return nil
 	end
 	local war3_id = base.id2string(jass.GetItemTypeId(handle))
-	-- print(war3_id)
+	
 	local data = ac.item[war3_id] 
-	-- print(data)
 	if type(data) == 'function' then
 		data = Item
 	end
 
 	if data.tip  then
-		data.tip = data.tip:gsub('%%([%w_]*)%%', function(k)
-			local value = data[k]
-			local tp = type(value)
-			if tp == 'function' then
-				return value(data)
-			end
-			return value
-		end)
 		Item.set_class_tip(war3_id,data.tip)
 	end
 
@@ -657,7 +617,6 @@ end
 --该函数会修改一类物品的标题
 function Item.set_class_title(id, title)
 	japi.EXSetItemDataString(base.string2id(id), 4, title)
-	japi.EXSetItemDataString(base.string2id(id), 2, '购买|cffFCD830'..title..'|r')
 end
 
 --设置物品图标
@@ -692,27 +651,27 @@ function mt:on_add_attribute()
 	local unit = self.owner
 
 	if self.life then
-		unit:add('生命上限',self.life)
+		unit:add_max_life(self.life)
 	end
 
 	if self.mana then
-		unit:add('魔法上限',self.mana)
+		unit:add_max_mana(self.mana)
 	end
 
 	if self.attack then
-		unit:add('攻击',self.attack)
+		unit:add_add_attack(self.attack)
 	end
 
 	if self.attack_speed then
-		unit:add('攻击速度',self.attack_speed)
+		unit:add_attack_speed(self.attack_speed)
 	end
 
 	if self.defence then
-		unit:add('护甲',self.defence)
+		unit:add_defence(self.defence)
 	end
 
 	if self.move_speed then
-		unit:add('移动速度',self.move_speed)
+		unit:fresh_item_move_speed()
 	end
 
 	if unit:is_type_hero() then
@@ -750,27 +709,27 @@ end
 function mt:on_remove_attribute()
 	local unit = self.owner
 	if self.life then
-		unit:add('生命上限',-self.life)
+		unit:add_max_life(-self.life)
 	end
 
 	if self.mana then
-		unit:add('魔法上限',-self.mana)
+		unit:add_max_mana(-self.mana)
 	end
 
 	if self.attack then
-		unit:add('攻击',-self.attack)
+		unit:add_add_attack(-self.attack)
 	end
 
 	if self.attack_speed then
-		unit:add('攻击速度',-self.attack_speed)
+		unit:add_attack_speed(-self.attack_speed)
 	end
 
 	if self.defence then
-		unit:add('护甲',-self.defence)
+		unit:add_defence(-self.defence)
 	end
 
 	if self.move_speed then
-		unit:add('移动速度',-self.move_speed)
+		unit:fresh_item_move_speed(self)
 	end
 
 	if unit:is_type_hero() then
@@ -965,7 +924,6 @@ local function register_jass_triggers()
 		-- print(j_it,it.handle,it.name,it.removed,it.unique,unit:has_item(it.name))
 
 		unit:event_notify('单位-获得物品', unit, it)
-		unit:event_notify('单位-获得物品后', unit, it)
 	end)
 	for i = 1, 16 do
 		jass.TriggerRegisterPlayerUnitEvent(j_trg, Player[i].handle, jass.EVENT_PLAYER_UNIT_PICKUP_ITEM, nil)
@@ -1055,7 +1013,6 @@ local function register_item(self, name, data)
 
 	setmetatable(data, data)
 	data.__index = Item
-	data.name = name
 
 	local item = {}
 	setmetatable(item, item)
@@ -1066,32 +1023,6 @@ local function register_item(self, name, data)
 	end
 	item.name = name
 	item.data = data
-
-	-- 图标，名字，说明 需要在物品刚注册时就更变。不是被创建出来时更变。
-	-- 预设商店的物品里，图标 无法修改。
-	if data.tip  then
-		
-		data.tip = data.tip:gsub('%%([%w_]*)%%', function(k)
-			local value = data[k]
-			local tp = type(value)
-			if tp == 'function' then
-				return value(data)
-			end
-			return value
-		end)
-
-		Item.set_class_tip(war3_id,data.tip)
-	end
-
-	if data.name  then
-		Item.set_class_title(war3_id,data.name)
-	end
-
-	if data.art  then
-		Item.set_class_art(war3_id,data.art)
-	end
-	-- print(data.tip,data.name,data.art)
-
 	self[name] = item
 	self[war3_id] = item
 	return item

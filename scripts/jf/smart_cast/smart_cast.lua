@@ -283,20 +283,7 @@ function message.hook(msg)
 	if msg.type == 'key_down' then
 		local code = msg.code
 		local state = msg.state
-		-- ,按键代码，按键类型,message
-		ac.game:event_notify('玩家-按下按键',  code,state,message)
-
-		-- print(ac.player.self._last_code,code,'====',ac.player.self._last_code_time,ac.clock())
-		if  ac.player.self._last_code == code  and (ac.clock() - ac.player.self._last_code_time) < 1000 then
-			ac.game:event_notify('玩家-双击按键',  code,state,message)
-		else
-			--记录上次按下的按钮,时间
-			ac.player.self._last_code = code
-			ac.player.self._last_code_time = ac.clock()
-		end	
-
-
-
+		
 		--技能快捷键
 		for name, key in ipairs{'Q', 'W', 'E', 'R'} do
 			if code == keyboard[key] then
@@ -420,9 +407,6 @@ function message.hook(msg)
 	if msg.type == 'key_up' then
 		local code = msg.code
 		
-		-- ,按键代码,message
-		ac.game:event_notify('玩家-按键弹起', code , message)
-		
 		--如果是组合键,则跳过
 		local state = msg.state
 		if state ~= 0 then
@@ -451,9 +435,6 @@ function message.hook(msg)
 	--鼠标按下消息
 	if msg.type == 'mouse_down' then
 		local code = msg.code
-		
-		-- message,按键代码
-		ac.game:event_notify('玩家-鼠标按下', code , message)
 
 		-- 鼠标左键按下
 		if code == 1 then

@@ -18,17 +18,6 @@ mt.type = 'region'
 --句柄
 mt.handle = 0
 
---4个数值
-mt.minx = nil
-mt.miny = nil
-mt.maxx = nil
-mt.maxy = nil
-
---获取4个值
-function mt:get()
-	return self.minx, self.miny, self.maxx, self.maxy
-end
-
 --创建不规则区域
 function region.create(...)
 	local rgn = setmetatable({}, region)
@@ -95,67 +84,15 @@ function mt:event(name)
 	return ac.event_register(self, name)
 end
 
-function mt:compare_set(other)
-	
-	local minx, miny, maxx, maxy = self:get()
-	local minx1, miny1, maxx1, maxy1 = other:get()
-	--排除0,0,0,0区域
-	if not minx or not miny or not maxx or not maxy  then
-		self.minx = minx1
-		self.miny = miny1
-		self.maxx = maxx1
-		self.maxy = maxy1
-		return 
-	end	
-	
-	if minx1 < self.minx then
-		self.minx = minx1
-	end	
-	if miny1 < self.miny then
-		self.miny = miny1
-	end
-	if maxx1 > self.maxx then
-		self.maxx = maxx1
-	end
-	if maxy1 > self.maxy then
-		self.maxy = maxy1
-	end
-end	
--- 获得不规则区域内的随机一点
-function mt:get_point()
-	local minx, miny, maxx, maxy = self:get()
-	local x1 = math.modf(minx/32)
-	local x2 = math.modf(maxx/32)
-	local y1 = math.modf(miny/32)
-	local y2 = math.modf(maxy/32)
-	
-	while true do
-		local point = ac.point(
-			math.random(x1,x2)*32,
-			math.random(y1,y2)*32
-		)
-		local x,y = point:get_point():get()
-		-- print('不规则区域内的随机一点',x,y)
-
-		if  self < point  then
-			self.point = point
-			return self.point
-		end	
-	end
-end
-
 --在不规则区域中添加/移除区域
 --	region = region + other
 function region:__add(other)
 	if other.type == 'rect' then
 		--添加矩形区域
 		jass.RegionAddRect(self.handle, rect.j_temp(other))
-		self:compare_set(other)
-		
 	elseif other.type == 'point' then
 		--添加单元点
 		jass.RegionAddCell(self.handle, other:get())
-		self:compare_set(other)
 	elseif other.type == 'circle' then
 		--添加圆形
 		local x, y, r = other:get()
@@ -171,7 +108,6 @@ function region:__add(other)
 	else
 		jass.RegionAddCell(self.handle, other:get_point():get())
 	end
-	
 
 	return self
 end
