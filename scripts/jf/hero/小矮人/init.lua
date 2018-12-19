@@ -45,7 +45,7 @@ return ac.hero.create '小矮人'
 	data.common_attack = true
 	data.skill = data.skill 猥琐的闪电箭   灵符[梦想封印]
 	]]
-	skill_names = ' 闪烁  万箭齐发   力量III 爆裂火球   ' ,
+	skill_names = ' 闪烁  多重影分身   力量III 爆裂火球   ' ,
 
 	attribute = {
 		['力量'] = 10,

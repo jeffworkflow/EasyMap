@@ -1,6 +1,27 @@
 local jass = require 'jass.common'
 local japi = require 'jass.japi'
 local move = require 'types.move'
+local unit = require 'types.unit'
+
+
+
+oldSetUnitState = japi.SetUnitState--(self.handle, 0x11, 1)
+oldGetUnitState = japi.GetUnitState--(self.handle, 0x12) + 1
+
+japi.SetUnitState = function (handle,id,num)
+	if type(id) == 'number' then 
+		id = jass.ConvertUnitState(id)
+	end
+	return oldSetUnitState(handle,id,num)
+end 
+
+japi.GetUnitState = function (handle,id)
+	if type(id) == 'number' then 
+		id = jass.ConvertUnitState(id)
+	end
+	return oldGetUnitState(handle,id)
+end 
+
 
 local math = math
 local string_gsub = string.gsub
@@ -46,16 +67,18 @@ local attribute = {
 	['法爆伤害']		=	true,--默认%
 	['技能伤害']		=	true, --默认表示为%
 	['技能基础伤害']	 =	true, --默认表示为基础值
-	['减伤比']			=	true, --默认表示为%
-	['减伤值']		    =	true, --默认表示为基础值
+	['减免']			=	true, --默认表示为%
+	['减伤']		    =	true, --默认表示为基础值
 	['金币加成']		=	true,--默认表示为%
 	['经验加成']		=	true,--默认表示为%
 	['天赋触发几率']	=	true,--默认表示为%
 	['额外投射物数量']	=	true,--默认表示为基础值
+	['额外连锁数量']	=	true,--默认表示为基础值
 	['额外范围']		=	true,--默认表示为基础值
 	['攻击回血']		=	true,--默认表示为基础值
 	['击杀回血']		=	true,--默认表示为基础值
 	['对BOSS额外伤害']  =   true,--默认表示为%
+	['基础金币']  =   true,--默认表示为%
 }
 
 local set = {}
@@ -216,18 +239,18 @@ end
 
 --力量
 local str_attack = 1
-local str_deadly = 0.05  --1点力量增加 0.0005% 致命一击
-local str_hp = 10
+local str_deadly = 0.1  --1点力量增加 0.0005% 致命一击
+local str_hp = 15
 
 --敏捷
 local agi_speed = 0.1
-local agi_heart = 0.04
-local agi_defense = 0.1
+local agi_heart = 0.067
+local agi_defense = 0.2
 
 --智力
 local int_mp = 15
-local int_skill = 0.05
-local int_explosion = 0.04
+local int_skill = 0.1
+local int_explosion = 0.1
 
 
 on_set['力量'] = function(self)
@@ -236,11 +259,11 @@ on_set['力量'] = function(self)
 	
 	return function()
         local value = self:get '力量' - old_value
-		self:set('生命上限', self:get '生命上限' + value * str_hp)
+		self:add('生命上限',  value * str_hp)
 		-- 增加致命一击
-		self:set('致命伤害', self:get '致命伤害' + value * str_deadly)
+		self:add('致命伤害',  value * str_deadly)
 		-- 增加攻击
-		self:set('攻击', self:get '攻击' + value * str_attack)
+		self:add('攻击', value * str_attack)
 	end	
 -- end
 end
@@ -252,11 +275,11 @@ on_set['敏捷'] = function(self,old_value)
 	return function()
 		local value =  self:get '敏捷' - old_value
 		-- 增加护甲
-		self:set('护甲', self:get '护甲' + value * agi_defense)
+		self:add('护甲', value * agi_defense)
 		-- 增加会心伤害
-		self:set('会心伤害', self:get '会心伤害' + value * agi_heart)
+		self:add('会心伤害',  value * agi_heart)
 		-- 增加攻击
-		self:set('攻击速度', self:get '攻击速度' + value * agi_speed)
+		self:add('攻击速度', value * agi_speed)
 	end	
 end
 
@@ -266,11 +289,11 @@ on_set['智力'] = function(self,old_value)
 	return function()
 		local value =  self:get '智力' - old_value
 		-- 增加魔法上限
-		self:set('魔法上限', self:get '魔法上限' + value * int_mp)
+		self:add('魔法上限', value * int_mp)
 		-- 增加技能伤害
-		self:set('技能伤害', self:get '技能伤害' + value * int_skill)
+		self:add('技能伤害', value * int_skill)
 		-- 增加法爆伤害
-		self:set('法爆伤害', self:get '法爆伤害' + value * int_explosion)
+		self:add('法爆伤害', value * int_explosion)
 	end
 end
 
@@ -282,9 +305,13 @@ end
 set['生命'] = function(self, life)
 	if life > 1 then
 		jass.SetWidgetLife(self.handle, life)
+
 	else
 		jass.SetWidgetLife(self.handle, 1)
+
 	end
+
+	self:event_notify('单位-生命变化',self)
 end
 
 on_get['生命'] = function(self, life)
@@ -323,6 +350,7 @@ end
 
 set['魔法'] = function(self, mana)
 	jass.SetUnitState(self.handle, jass.UNIT_STATE_MANA, math.ceil(mana))
+	self:event_notify('单位-魔法变化',self)
 end
 
 on_add['魔法'] = function(self, v1, v2)
@@ -363,43 +391,43 @@ on_set['魔法上限'] = function(self)
 end
 
 get['攻击'] = function(self)
-	japi.SetUnitState(self.handle, 0x10, 1)
-	japi.SetUnitState(self.handle, 0x11, 1)
-	return japi.GetUnitState(self.handle, 0x12) + 1
+	japi.SetUnitState(self.handle, jass.ConvertUnitState(0x10), 1)
+	japi.SetUnitState(self.handle, jass.ConvertUnitState(0x11), 1)
+	return japi.GetUnitState(self.handle, jass.ConvertUnitState(0x12)) + 1
 end
 
 set['攻击'] = function(self, attack)
-	japi.SetUnitState(self.handle, 0x12, attack - 1)
+	japi.SetUnitState(self.handle, jass.ConvertUnitState(0x12), attack - 1)
 	if self.freshDamageInfo then
 		self:freshDamageInfo()
 	end
 end
 
 get['护甲'] = function(self)
-	return japi.GetUnitState(self.handle, 0x20)
+	return japi.GetUnitState(self.handle, jass.ConvertUnitState(0x20))
 end
 
 set['护甲'] = function(self, defence)
-	japi.SetUnitState(self.handle, 0x20, defence)
+	japi.SetUnitState(self.handle, jass.ConvertUnitState(0x20), defence)
 	if self.freshDefenceInfo then
 		self:freshDefenceInfo()
 	end
 end
 
 get['攻击间隔'] = function(self)
-	return japi.GetUnitState(self.handle, 0x25)
+	return japi.GetUnitState(self.handle, jass.ConvertUnitState(0x25))
 end
 
 set['攻击间隔'] = function(self, attack_cool)
-	japi.SetUnitState(self.handle, 0x25, attack_cool)
+	japi.SetUnitState(self.handle, jass.ConvertUnitState(0x25), attack_cool)
 end
 
 set['攻击速度'] = function(self, attack_speed)
 	if attack_speed >= 0 then
-		japi.SetUnitState(self.handle, 0x51, 1 + attack_speed / 100)
+		japi.SetUnitState(self.handle, jass.ConvertUnitState(0x51), 1 + attack_speed / 100)
 	else
 		--当攻击速度小于0的时候,每点相当于攻击间隔增加1%
-		japi.SetUnitState(self.handle, 0x51, 1 + attack_speed / (100 - attack_speed))
+		japi.SetUnitState(self.handle, jass.ConvertUnitState(0x51), 1 + attack_speed / (100 - attack_speed))
 	end
 end
 
@@ -408,11 +436,15 @@ on_set['攻击速度'] = function(self)
 end
 
 get['攻击距离'] = function(self)
-	return japi.GetUnitState(self.handle, 0x16)
+	return japi.GetUnitState(self.handle, jass.ConvertUnitState(0x16))
 end
 
 set['攻击距离'] = function(self, attack_range)
-	japi.SetUnitState(self.handle, 0x16, attack_range)
+	japi.SetUnitState(self.handle, jass.ConvertUnitState(0x16), attack_range)
+	--修改攻击距离后同时修改主动攻击范围
+	if self.owner:is_player() then
+		self:set_search_range(self:get '攻击距离')
+	end
 end
 
 get['移动速度'] = function(self)

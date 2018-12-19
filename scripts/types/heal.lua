@@ -28,31 +28,35 @@ mt.skill = nil
 
 --创建漂浮文字
 local function text(heal)
+	local angle = math.random(55,125)
 	if heal.target ~= ac.player.self.hero then
 		return
 	end
-	local tag = heal.target.heal_texttag
-	if tag and ac.clock() - tag.time < 2000 then
-		tag.heal = tag.heal + heal.heal
-		tag:setText(('%.f'):format(tag.heal), 8 + (tag.heal ^ 0.5) / 5)
-	else
-		local x, y = heal.target:get_point():get()
-		local z = heal.target:get_point():getZ()
-		local tag = ac.texttag
-		{
-			string = ('+%.f'):format(heal.heal),
-			size = 8 + (heal.heal ^ 0.5) / 5,
-			position = ac.point(x - 60, y, z - 30),
-			speed = 86,
-			angle = -45,
-			red = 20,
-			green = 100,
-			blue = 20,
-			heal = heal.heal,
-			time = ac.clock(),
-		}
-		heal.target.heal_texttag = tag
-	end
+	local x, y = heal.target:get_point():get()
+	local z = heal.target:get_point():getZ()
+	-- while true do
+	-- 	angle = math.random(45,135)
+	-- 	if  angle < 80  or  angle > 100 then
+	-- 		break
+	-- 	end	
+	-- end	
+	local tag = ac.texttag
+	{
+		string = ('+%.f'):format(heal.heal),
+		size = 8 ,
+		position = ac.point(x-30, y, z - 30),
+		speed = 120,
+		angle = angle,
+		red = 20*2.55,
+		green = 100*2.55,
+		blue = 20*2.55,
+		life = 1.2,
+		fade = 0.9,
+		heal = heal.heal,
+		time = ac.clock(),
+	}
+	
+	
 end
 
 --创建治疗

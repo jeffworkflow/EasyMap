@@ -5238,8 +5238,8 @@ WESTRING_UEVAL_UMA1=攻击 1 - 射弹弧度
 WESTRING_UEVAL_UMA1_HINT="射弹弧度=射弹抛物线最大高度/平面位移距离"
 WESTRING_UEVAL_UMH1=攻击 1 - 射弹自导允许
 WESTRING_UEVAL_UMH1_HINT=设置箭矢是否自动跟踪目标
-WESTRING_UEVAL_UA1R=攻击 1 - 攻击距离
-WESTRING_UEVAL_UA1R_HINT="就是射程,但受到主动攻击距离的制限."
+WESTRING_UEVAL_UA1R=攻击 1 - 攻击范围
+WESTRING_UEVAL_UA1R_HINT="就是射程,但受到主动攻击范围的制限."
 WESTRING_UEVAL_UA1C=攻击 1 - 攻击间隔
 WESTRING_UEVAL_UA1C_HINT=两次攻击间的间隔,最小值为0.1.游戏中攻速增加上限为原速的5倍(即提高4倍),但不会超过每秒45.46次的上限.
 WESTRING_UEVAL_UA1F=攻击 1 - 全伤害范围
@@ -5272,8 +5272,8 @@ WESTRING_UEVAL_UMA2=攻击 2 - 射弹弧度
 WESTRING_UEVAL_UMA2_HINT="射弹弧度=射弹抛物线最大高度/平面位移距离"
 WESTRING_UEVAL_UMH2=攻击 2 - 射弹自导允许
 WESTRING_UEVAL_UMH2_HINT=设置箭矢是否自动跟踪目标
-WESTRING_UEVAL_UA2R=攻击 2 - 攻击距离
-WESTRING_UEVAL_UA2R_HINT="就是射程,但受到主动攻击距离的制限."
+WESTRING_UEVAL_UA2R=攻击 2 - 攻击范围
+WESTRING_UEVAL_UA2R_HINT="就是射程,但受到主动攻击范围的制限."
 WESTRING_UEVAL_UA2C=攻击 2 - 攻击间隔
 WESTRING_UEVAL_UA2C_HINT=两次攻击间的间隔,最小值为0.1.游戏中攻速增加上限为原速的5倍(即提高4倍),但不会超过每秒45.46次的上限.
 WESTRING_UEVAL_UA2F=攻击 2 - 全伤害范围
@@ -5304,9 +5304,9 @@ WESTRING_UEVAL_UWU1=攻击 1 - 显示UI
 WESTRING_UEVAL_UWU1_HINT=设置面板是否显示攻击(A)键.
 WESTRING_UEVAL_UWU2=攻击 2 - 显示UI
 WESTRING_UEVAL_UWU2_HINT=设置面板是否显示攻击(A)键.
-WESTRING_UEVAL_URB1=攻击 1 - 攻击距离缓冲
+WESTRING_UEVAL_URB1=攻击 1 - 攻击范围缓冲
 WESTRING_UEVAL_URB1_HINT="近战或非跟踪箭矢单位攻击移动中的单位,发动攻击时目标可能已出射程外,只要目标没出该范围(射程+缓冲范围)则仍会伤害."
-WESTRING_UEVAL_URB2=攻击 2 - 攻击距离缓冲
+WESTRING_UEVAL_URB2=攻击 2 - 攻击范围缓冲
 WESTRING_UEVAL_URB2_HINT="近战或非跟踪箭矢单位攻击移动中的单位,发动攻击时目标可能已出射程外,只要目标没出该范围(射程+缓冲范围)则仍会伤害."
 WESTRING_UEVAL_UDP1=攻击 1 - 动画伤害点  
 WESTRING_UEVAL_UDP1_HINT="单位实际发动攻击效果的时间点,即攻击前摇,期间可以打断该次攻击,该项大于攻击间隔时将取该项为单位实际攻击间隔. "
@@ -5328,9 +5328,9 @@ WESTRING_UEVAL_USR1=攻击 1 - 穿透伤害范围
 WESTRING_UEVAL_USR1_HINT=仅对穿透攻击有效.
 WESTRING_UEVAL_USR2=攻击 2 - 穿透伤害范围
 WESTRING_UEVAL_USR2_HINT=仅对穿透攻击有效.
-WESTRING_UEVAL_UACQ=主动攻击距离                            
+WESTRING_UEVAL_UACQ=主动攻击范围                            
 WESTRING_UEVAL_UACQ_HINT="单位会对该范围内的敌人进行主动攻击. 另外单位射程不大于该值.同时也影响到一些自动选目标技能的施法距离."
-WESTRING_UEVAL_UAMN=最小攻击距离             
+WESTRING_UEVAL_UAMN=最小攻击范围             
 WESTRING_UEVAL_UAMN_HINT=单位无法对小于该值的范围内的敌人进行主动攻击.
 WESTRING_UEVAL_UDTY=护甲类型
 WESTRING_UEVAL_UDEF=基础护甲
@@ -6241,7 +6241,7 @@ WESTRING_AEVAL_EAT2=吞食延迟
 WESTRING_AEVAL_EAT3=总恢复生命值
 WESTRING_AEVAL_ENS1=空中单位坠落时间
 WESTRING_AEVAL_ENS2=空中单位高度
-WESTRING_AEVAL_ENS3=近战攻击距离
+WESTRING_AEVAL_ENS3=近战攻击范围
 WESTRING_AEVAL_ENT1=新单位类型
 WESTRING_AEVAL_EGM1=采集黄金数/间隔
 WESTRING_AEVAL_EGM2=间隔时间
@@ -6873,8 +6873,8 @@ WESTRING_EEVAL_AUDB=光环数据奖励 - 基础
 WESTRING_EEVAL_AUDM=光环数据奖励 - 增量
 WESTRING_EEVAL_ASDB=穿透攻击距离奖励 - 基础
 WESTRING_EEVAL_ASDM=穿透攻击距离奖励 - 增量
-WESTRING_EEVAL_ASRB=穿透攻击距离奖励 - 基础
-WESTRING_EEVAL_ASRM=穿透攻击距离奖励 - 增量
+WESTRING_EEVAL_ASRB=穿透攻击范围奖励 - 基础
+WESTRING_EEVAL_ASRM=穿透攻击范围奖励 - 增量
 WESTRING_EEVAL_ROOB=攻击允许(扎根)
 WESTRING_EEVAL_UROB=攻击允许(拔起)
 WESTRING_EEVAL_UART=新防御类型
@@ -6897,7 +6897,7 @@ WESTRING_GE_UPGRADEEFFECT_ATTACKDICE=攻击骰子数奖励
 WESTRING_GE_UPGRADEEFFECT_ATTACKRANGE=攻击射程奖励
 WESTRING_GE_UPGRADEEFFECT_ATTACKSPEED=攻击速度奖励(%)
 WESTRING_GE_UPGRADEEFFECT_ATTACKSPILLDST=穿透攻击距离奖励
-WESTRING_GE_UPGRADEEFFECT_ATTACKSPILLRAD=穿透攻击距离奖励
+WESTRING_GE_UPGRADEEFFECT_ATTACKSPILLRAD=穿透攻击范围奖励
 WESTRING_GE_UPGRADEEFFECT_ATTACKTARGCOUNT=攻击目标数量奖励
 WESTRING_GE_UPGRADEEFFECT_AURADATA=光环数据奖励
 WESTRING_GE_UPGRADEEFFECT_ENABLEWEAPON=攻击允许

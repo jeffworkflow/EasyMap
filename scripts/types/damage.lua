@@ -56,6 +56,8 @@ mt.physicals_crit_flag = nil
 mt.spells_crit_flag = nil
 --是否是会心一击
 mt.heart_crit_flag = nil
+--是否触发攻击回血
+mt.damage_hp = false
 
 --累计的伤害倍率变化
 mt.change_rate = 1
@@ -64,7 +66,6 @@ mt.change_rate = 1
 mt.weapon = false
 
 --是否是致命一击
-
 function mt:is_physicals_crit()
 	return self.physicals_crit_flag
 end
@@ -112,6 +113,21 @@ end
 --获取当前伤害
 function mt:get_current_damage()
 	return self.current_damage
+end
+
+--修改当前伤害
+function mt:set_current_damage(value)
+	self.current_damage = value
+end
+
+--修改原始伤害
+function mt:set_damage(value)
+	self.damage = value
+end
+
+--是否触发攻击回血
+function mt:is_damage_hp()
+	return self.damage_hp
 end
 
 function mt:mul(n, callback)
@@ -405,6 +421,10 @@ local function on_texttag(self)
 	if self.source:get_owner() ~= ac.player.self and self.target ~= ac.player.self.hero   then
 		return
 	end
+	
+	-- if not self:is_physicals_crit() and not self:is_spells_crit() and not self:is_heart_crit() then
+	-- 	return
+	-- end
     --普攻，法术攻击 颜色 白色
 	local color ={}
 	color['r'] = 255
@@ -442,7 +462,7 @@ local function on_texttag(self)
 	if self.current_damage > 10000 then
 		str = str..(' %.1f'):format(self.current_damage/10000)..'万'
 	else	
-		str = str..(' %.1f'):format(self.current_damage)
+		str = str..(' %.0f'):format(self.current_damage)
 	end
 
 	local x, y = self.target:get_point():get()
@@ -462,6 +482,7 @@ local function on_texttag(self)
 		fade = 0.5,
 		time = ac.clock(),
 	}
+	
 	if tag then 
 		local i = 0
 		ac.timer(10, 25, function()
@@ -629,16 +650,18 @@ end
 --计算减伤
 function mt:Injury()
 	local target = self.target
-	local dmg = target:get '减伤比'
+	local dmg = target:get '减免'
 
 	if dmg <=0 then 
 		dmg = 0
-	end 	
-	if self.current_damage <= target:get '减伤值'  then 
+	end
+
+	if self.current_damage <= target:get '减伤'  then 
 		self.current_damage = 0
 	else 
-	    self.current_damage = (self.current_damage - target:get '减伤值') * (1 - dmg/100)
+	    self.current_damage = (self.current_damage - target:get '减伤') * (1 - dmg/100)
 	end	
+
 end
 
 --计算技能伤害加成
@@ -684,16 +707,35 @@ function mt:count_damage_hp()
 	local source = self.source
 	local a = source:get '攻击回血'
 	if a > 0 then
-		source:set('生命',source:get '生命' + a)
+
+		self.source:heal
+		{
+			source = self.source,
+			heal = a,
+			skill = self.skill,
+			damage = self,
+		}
+		--在身上创建特效
+		self.source:add_effect('origin', [[Abilities\Spells\Undead\VampiricAura\VampiricAuraTarget.mdl]]):remove()
 	end
+
 end
 
 --击杀回血
 function mt:count_kill_hp()
 	local source = self.source
 	local a = source:get '击杀回血'
+
 	if a > 0 then
-		source:set('生命',source:get '生命' + a)
+		self.source:heal
+		{
+			source = self.source,
+			heal = a,
+			skill = self.skill,
+			damage = self,
+		}
+		--在身上创建特效
+		self.source:add_effect('origin', [[Abilities\Spells\Undead\VampiricAura\VampiricAuraTarget.mdl]]):remove()
 	end
 end
 --// add by jeff 
@@ -721,6 +763,8 @@ function damage:__call()
 		end
 	end
 	
+	ac.game:event_notify('伤害初始化', self)
+
 	if not source then
 		self.source = self.target
 		source = target
@@ -755,7 +799,7 @@ function damage:__call()
 	if not self.real_damage then
 		source:event_notify('造成伤害前效果', self)
 		target:event_notify('受到伤害前效果', self)
-		
+
 		--攻击命中在伤害有效性后结算
 		if self:is_attack() then
 			if self.common_attack then
@@ -768,12 +812,15 @@ function damage:__call()
 		--[[  add by jeff
 			start
 		]]
-
 		--判断攻击类型  技能需要额外加成属性栏里面的技能伤害值
-		if not self.common_attack then
-			self.current_damage = self.damage + source:get('技能基础伤害')
+		if self.common_attack then
+			source:event_notify('单位-造成普攻伤害', self)
+			target:event_notify('单位-受到普攻伤害', self)
+		else
+			source:event_notify('单位-造成技能伤害', self)
+			target:event_notify('单位-受到技能伤害', self)
+			self.current_damage = self.current_damage + source:get('技能基础伤害')
 		end
-
 		--判断伤害类型
 		if self.damage_type == '物理' then	
 			--计算物理暴击
@@ -788,12 +835,11 @@ function damage:__call()
 			end
 			source:event_notify('单位-造成法术伤害', self)
 		end
-
 		-- 计算会心一击
-		if   self:is_heart_crit()  then
+		if  self:is_heart_crit() then
 			self:on_heart_crit_damage()
 		end
-		
+
 		--计算 对 boss 额外伤害
 		self:on_boss_damage()
 
@@ -806,10 +852,9 @@ function damage:__call()
 			--计算魔抗 (技能法术)
 			self:count_resistance()
 		end	
-
 		--计算减伤
 		self:Injury()
-		
+
 		--判断伤害类型
 		if not self:is_common_attack()  then
 			--计算技能伤害加成
@@ -831,6 +876,18 @@ function damage:__call()
 	end
 
 	--消耗护盾
+	-- local effect_damage = cost_shield(self)
+	-- local life = target:get '生命'
+	-- if life <= effect_damage then
+	-- 	self:kill()
+	-- else
+	-- 	target:set('生命', life - effect_damage)
+	-- end
+	--消耗护盾
+
+
+	target:event_notify('伤害计算完毕', self)
+
 	local effect_damage = cost_shield(self)
 	local life = target:get '生命'
 	if life <= effect_damage then
@@ -838,12 +895,16 @@ function damage:__call()
 	else
 		target:set('生命', life - effect_damage)
 	end
-
 	--音效
 	on_sound(self)
 	--漂浮文字
 	on_texttag(self)
 	
+	if self:is_common_attack() and self.source:is_hero() then
+		--攻击回血
+		self:count_damage_hp()
+	end
+
 	if not self.real_damage then
 
 		if not target:is_type('建筑') then
@@ -851,10 +912,9 @@ function damage:__call()
 			-- on_life_steal(self)
 			-- --溅射
 			-- on_splash(self)
-			--攻击回血
-			self:count_damage_hp()
+
 			--击杀回血
-			self:count_damage_hp()
+			--self:count_kill_hp()
 		end
 		
 		--伤害效果
@@ -892,7 +952,7 @@ function mt:event_dispatch(name)
 end
 
 function mt:event_notify(name)
-	print('伤害事件：',name,event[name])
+	-- print('伤害事件：',name,event[name])
 	return event[name](self)
 end
 
