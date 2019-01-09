@@ -156,7 +156,7 @@ local function start()
 	for i = 1, 10 do
 		local p = player[i]
 		--在选人区域创建可见度修整器(对每个玩家,永久)
-		fogmodifier.create(p, map.rects['选人区域'])
+		fogmodifier.create(ac.player(i), map.rects['选人区域'])
 	
 		-- p:create_unit('hfoo',map.rects['选人区域']);
         --print_r(map.rects['选人区域'])

@@ -33,4 +33,10 @@ local p = process()
 if p:create(nil, command, nil) then
     p:close()
 end
-
+--生成 特效引用的 lua 文件
+command = root.."\\scripts\\jf\\effect.bat"
+print(command)
+local p = process()
+if p:create(nil, command, nil) then
+    p:close()
+end

@@ -115,7 +115,7 @@ function map.init()
 	-- print(shop)
 	shop:add_item_button('灵宝剑',10)
 	-- shop:add_item_button('新手剑',10)
-	shop:add_item_button('神石',10)
+	-- shop:add_item_button('神石',10)
 	
 	local rect = require 'types.rect'
 	local tt = rect.create('400','0','800','400')
@@ -154,6 +154,7 @@ function map.init()
 		-- jass.DialogDisplay(ac.player(1).handle, handle, true)
 			  
 	end)
+	require 'jf.effect._init'
 	
 
 
